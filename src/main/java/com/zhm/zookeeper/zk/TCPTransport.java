@@ -3,6 +3,7 @@ package com.zhm.zookeeper.zk;
 import com.zhm.zookeeper.rpc.RpcRequest;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -30,7 +31,18 @@ public class TCPTransport {
         Socket socket = null;
 
         socket = newSocket();
-        ObjectOutputStream outputStream = new ObjectOutputStream()
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject(request);
+            outputStream.flush();
+            ObjectInputStream  inputStream = new ObjectInputStream(socket.getInputStream());
+            Object result = inputStream.readObject();
+            inputStream.close();
+            outputStream.close();
+            return result;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("失败");
+        }
     }
 
 }

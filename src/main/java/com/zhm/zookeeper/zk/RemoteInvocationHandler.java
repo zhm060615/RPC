@@ -1,16 +1,13 @@
 package com.zhm.zookeeper.zk;
 
 import com.zhm.zookeeper.rpc.RpcRequest;
-import sun.rmi.transport.tcp.TCPTransport;
 
 import java.lang.reflect.Method;
 
-public class RemoteInvocationHandler implements InvocationHandler {
+public class RemoteInvocationHandler implements java.lang.reflect.InvocationHandler {
 
     private IServiceDiscovery serviceDiscovery;
 
-    private String host;
-    private int port;
 
     public RemoteInvocationHandler(IServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
@@ -26,7 +23,7 @@ public class RemoteInvocationHandler implements InvocationHandler {
 
         String serviceAddress = serviceDiscovery.discover(rpcRequest.getClassName());
 
-        TCPTransport tcpTransport = new TCPTransport(this.host,this.port);
+        TCPTransport tcpTransport = new TCPTransport(serviceAddress);
         return tcpTransport.send(rpcRequest);
     }
 }

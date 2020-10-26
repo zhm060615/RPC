@@ -2,9 +2,11 @@ package com.zhm.zookeeper.zk;
 
 import com.zhm.zookeeper.rpc.Zkconfig;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +17,18 @@ public class ServiceDiscoveryImpl implements IServiceDiscovery {
 
     private String address;
 
+    private CuratorFramework curatorFramework;
+
     public ServiceDiscoveryImpl(String address) {
         this.address = address;
+        curatorFramework = CuratorFrameworkFactory.builder()
+                .connectString(address)
+                .sessionTimeoutMs(4000)
+                .retryPolicy(new ExponentialBackoffRetry(1000,10)).build();
+        curatorFramework.start();
     }
 
-    private CuratorFramework curatorFramework;
+
     @Override
     public String discover(String serviceName) {
         String path = Zkconfig.ZK_REGISTER_PATH + "/" + serviceName;
